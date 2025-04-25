@@ -1,69 +1,44 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import {
-  getCurrentUser,
-  logout as serviceLogout,
-  login as serviceLogin,
-} from "@/services/authService";
-
-interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  token: string;
-}
+import { createContext, useContext, useState, useEffect } from "react";
 
 interface AuthContextType {
-  user: User | null;
-  loading: boolean;
+  user: any; // Replace with your user type
   login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any>(null); // Replace 'any' with your user type
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
-        }
-      } catch (error) {
-        console.error("Failed to get current user:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    initAuth();
+    // Simulate checking auth state (e.g., from a token or API)
+    setLoading(false);
   }, []);
 
-  const login = async (credentials: { email: string; password: string }) => {
-    const data = await serviceLogin(credentials);
-    setUser(data.user);
+  const login = async ({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }) => {
+    // Implement your login logic (e.g., API call)
+    const mockUser = { email }; // Replace with actual auth logic
+    setUser(mockUser);
   };
 
-  const handleLogout = () => {
-    serviceLogout();
+  const logout = () => {
+    // Implement logout logic (e.g., clear token)
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, login, logout: handleLogout }}
-    >
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -71,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
